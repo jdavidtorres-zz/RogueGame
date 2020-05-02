@@ -9,11 +9,53 @@ public class BoardManager : MonoBehaviour
     public int rows = 8;
     private Transform boardHolder;
 
-    public GameObject[] floorTiles, outerWallTiles;
+    public GameObject[] floorTiles, outerWallTiles, wallTiles;
+    public GameObject[] foodTiles;
+    public GameObject[] enemyTiles;
+    public GameObject exitTile;
 
-    public void SetupScene()
+    private List<Vector2> gridPositions = new List<Vector2>();
+
+    void InitializeList()
+    {
+        gridPositions.Clear();
+        for (int x = 1; x < columns - 1; x++)
+        {
+            for (int y = 1; y < rows - 1; y++)
+            {
+                gridPositions.Add(new Vector2(x, y));
+            }
+        }
+    }
+
+    Vector2 RandomPosition()
+    {
+        int randomIndex = Random.Range(0, gridPositions.Count);
+        Vector2 randomPosition = gridPositions[randomIndex];
+        gridPositions.RemoveAt(randomIndex);
+        return randomPosition;
+    }
+
+    void LayoutObjectAtRandom(GameObject[] tileArray, int min, int max)
+    {
+        int objectCount = Random.Range(min, max + 1);
+        for (int i = 0; i < objectCount; i++)
+        {
+            Vector2 randomPosition = RandomPosition();
+            GameObject tileChoice = GetRandomInArray(tileArray);
+            Instantiate(tileChoice, randomPosition, Quaternion.identity);
+        }
+    }
+
+    public void SetupScene(int level)
     {
         BoardSetup();
+        InitializeList();
+        LayoutObjectAtRandom(wallTiles, 5, 9);
+        LayoutObjectAtRandom(foodTiles, 1, 5);
+        int enemies = (int)System.Math.Log(level, 2);
+        LayoutObjectAtRandom(enemyTiles, enemies, enemies);
+        Instantiate(exitTile, new Vector2(columns - 1, rows - 1), Quaternion.identity);
     }
 
     void Start()
