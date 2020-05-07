@@ -58,16 +58,6 @@ public class BoardManager : MonoBehaviour
         Instantiate(exitTile, new Vector2(columns - 1, rows - 1), Quaternion.identity);
     }
 
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
-
     void BoardSetup()
     {
         boardHolder = new GameObject("Board").transform;

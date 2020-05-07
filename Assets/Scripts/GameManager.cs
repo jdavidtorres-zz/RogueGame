@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -9,11 +11,17 @@ public class GameManager : MonoBehaviour
     public BoardManager boardScript;
     public float turnDelay = 0.1f;
     public int playerFoodPoints = 100;
+    public float levelStartDelay = 2f;
+    public bool doingSetup;
+
     [HideInInspector]
     public bool playerTurrn = true;
 
     private List<Enemy> enemies = new List<Enemy>();
     private bool enemiesMoving;
+    private int level = 0;
+    private GameObject levelImage;
+    private Text levelText;
 
     private void Awake()
     {
@@ -31,17 +39,28 @@ public class GameManager : MonoBehaviour
 
     void InitGame()
     {
-        boardScript.SetupScene(10);
+        doingSetup = true;
+        levelImage = GameObject.Find("LevelImage");
+        levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        levelText.text = "Day " + level;
+        levelImage.SetActive(true);
+
+        enemies.Clear();
+        boardScript.SetupScene(level);
+
+        Invoke("HideLevelImage", levelStartDelay);
     }
 
-    void Start()
+    private void HideLevelImage()
     {
-        enemies.Clear();
-        InitGame();
+        levelImage.SetActive(false);
+        doingSetup = false;
     }
 
     public void GameOver()
     {
+        levelText.text = "After " + level + " days, you starved.";
+        levelImage.SetActive(true);
         enabled = false;
     }
 
@@ -62,5 +81,32 @@ public class GameManager : MonoBehaviour
         }
         playerTurrn = true;
         enemiesMoving = false;
+    }
+
+    private void Update()
+    {
+        if (playerTurrn || enemiesMoving || doingSetup) return;
+        StartCoroutine(MoveEnemies());
+    }
+
+    public void AddEnemyToList(Enemy enemy)
+    {
+        enemies.Add(enemy);
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded += OnLevelFinishedLoading;
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded -= OnLevelFinishedLoading;
+    }
+
+    private void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
+    {
+        level++;
+        InitGame();
     }
 }
