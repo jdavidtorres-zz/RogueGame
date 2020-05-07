@@ -94,12 +94,12 @@ public class GameManager : MonoBehaviour
         enemies.Add(enemy);
     }
 
-    private void OnDisable()
+    private void OnEnable()
     {
         SceneManager.sceneLoaded += OnLevelFinishedLoading;
     }
 
-    private void OnEnable()
+    private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;
     }
